@@ -298,8 +298,7 @@ class PartitionAssignor(
             # Add changelog standbys only if global table
             if table.is_global:
                 changelog_topic_name = table._changelog_topic_name()
-                num_partitions = self.app.consumer.topic_partitions(
-                    changelog_topic_name)
+                num_partitions = table.partitions
                 assert num_partitions is not None
                 all_partitions = set(range(0, num_partitions))
                 for assignment in assignments.values():
