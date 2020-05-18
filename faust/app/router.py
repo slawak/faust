@@ -70,8 +70,8 @@ class Router(RouterT):
             raise SameNode()
         routed_url = request.url.with_host(host).with_port(int(port))
         async with app.http_client.get(routed_url) as response:
-            return web.text(
-                await response.text(),
+            return web.bytes(
+                await response.read(),
                 content_type=response.content_type,
                 status=response.status,
             )
