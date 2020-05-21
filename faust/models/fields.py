@@ -1,6 +1,6 @@
 import inspect
 import sys
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal, DecimalTuple
 from functools import lru_cache
 from operator import attrgetter
@@ -39,6 +39,7 @@ __all__ = [
     'FloatField',
     'IntegerField',
     'DatetimeField',
+    'DateField',
     'DecimalField',
     'BytesField',
     'StringField',
@@ -498,6 +499,26 @@ class DatetimeField(FieldDescriptor[datetime]):
         else:
             return value
 
+class DateField(FieldDescriptor[date]):
+
+    def to_python(self, value: Any) -> Any:
+        if self._to_python is None:
+            if self.model._options.isodates:
+                return self.prepare_value(value, coerce=True)
+            return self.prepare_value(value)
+        else:
+            return self._to_python(value)
+
+    def prepare_value(self, value: Any, *,
+                      coerce: bool = None) -> Optional[date]:
+        if self.should_coerce(value, coerce):
+            if value is not None and not isinstance(value, date):
+                return self.date_parser(value).date()
+            else:
+                return value
+        else:
+            return value
+
 
 class BytesField(CharField[bytes]):
     encoding: str = sys.getdefaultencoding()
@@ -539,6 +560,7 @@ TYPE_TO_FIELD = {
     str: StringField,
     bytes: BytesField,
     datetime: DatetimeField,
+    date: DateField,
 }
 
 

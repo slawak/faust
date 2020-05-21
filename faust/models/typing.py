@@ -12,7 +12,7 @@ import random
 import string
 import sys
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 from enum import Enum
 from itertools import count
@@ -112,6 +112,7 @@ class NodeType(Enum):
     ANY = 'ANY'
     LITERAL = 'LITERAL'
     DATETIME = 'DATETIME'
+    DATE = 'DATE'
     DECIMAL = 'DECIMAL'
     NAMEDTUPLE = 'NAMEDTUPLE'
     TUPLE = 'TUPLE'
@@ -125,6 +126,7 @@ class NodeType(Enum):
 #: Set of user node types.
 USER_TYPES = frozenset({
     NodeType.DATETIME,
+    NodeType.DATE,
     NodeType.DECIMAL,
     NodeType.USER,
     NodeType.MODEL,
@@ -384,6 +386,25 @@ class DatetimeNode(Node):
             return value
         return None
 
+class DateNode(Node):
+    type = NodeType.DATE
+    compatible_types = (date,)
+
+    def __post_init__(self) -> None:
+        self.root.found_types[self.type].add(self.expr)
+
+    def build(self, var: Variable, *args: Type) -> str:
+        self.root.add_closure(
+            '_iso8601_date_parse_', '__iso8601_date_parse__', self._maybe_coerce)
+        return f'_iso8601_date_parse_({var})'
+
+    def _maybe_coerce(
+            self, value: Union[str, date] = None) -> Optional[date]:
+        if value is not None:
+            if isinstance(value, str):
+                return self.root.date_parser(value).date()
+            return value
+        return None
 
 class NamedTupleNode(Node):
     type = NodeType.NAMEDTUPLE

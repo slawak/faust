@@ -130,8 +130,6 @@ def on_default(o: Any,
     elif _isinstance(o, maps):
         return _dict(o)
     elif _isinstance(o, dates):
-        if not _isinstance(o, has_time):
-            o = datetime.datetime(o.year, o.month, o.day, 0, 0, 0, 0)
         r = o.isoformat()
         if r.endswith('+00:00'):
             r = r[:-6] + 'Z'
