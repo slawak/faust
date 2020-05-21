@@ -468,43 +468,6 @@ class SetNode(Node):
         handler = self.root.build(member_var, member_type)
         return f'{{{handler} for {member_var} in {var}}}'
 
-
-class DictNode(Node):
-    type = NodeType.DICT
-    compatible_types = DICT_TYPES
-    use_origin = True
-
-    def build(self, var: Variable, *args: Type) -> str:
-        if not args:
-            return f'dict({var})'
-        return self._build_dict_expression(var, *args)
-
-    def _build_dict_expression(self, var: Variable,
-                               key_type: Type, value_type: Type) -> str:
-        key_var = var.next_identifier()
-        value_var = key_var.next_identifier()
-        key_handler = self.root.build(key_var, key_type)
-        value_handler = self.root.build(value_var, value_type)
-        return (f'{{{key_handler}: {value_handler} '
-                f'for {key_var}, {value_var} in {var}.items()}}')
-
-
-class ListNode(Node):
-    type = NodeType.LIST
-    compatible_types = LIST_TYPES
-    use_origin = True
-
-    def build(self, var: Variable, *args: Type) -> str:
-        if not args:
-            return f'list({var})'
-        return self._build_list_expression(var, *args)
-
-    def _build_list_expression(self, var: Variable, item_type: Type) -> str:
-        item_var = var.next_identifier()
-        handler = self.root.build(item_var, item_type)
-        return f'[{handler} for {item_var} in {var}]'
-
-
 class ModelNode(Node):
     type = NodeType.MODEL
     compatible_types = ()
@@ -550,6 +513,41 @@ class ModelNode(Node):
     def Model(self) -> Type[ModelT]:
         from .base import Model
         return Model
+
+class DictNode(Node):
+    type = NodeType.DICT
+    compatible_types = DICT_TYPES
+    use_origin = True
+
+    def build(self, var: Variable, *args: Type) -> str:
+        if not args:
+            return f'dict({var})'
+        return self._build_dict_expression(var, *args)
+
+    def _build_dict_expression(self, var: Variable,
+                               key_type: Type, value_type: Type) -> str:
+        key_var = var.next_identifier()
+        value_var = key_var.next_identifier()
+        key_handler = self.root.build(key_var, key_type)
+        value_handler = self.root.build(value_var, value_type)
+        return (f'{{{key_handler}: {value_handler} '
+                f'for {key_var}, {value_var} in {var}.items()}}')
+
+
+class ListNode(Node):
+    type = NodeType.LIST
+    compatible_types = LIST_TYPES
+    use_origin = True
+
+    def build(self, var: Variable, *args: Type) -> str:
+        if not args:
+            return f'list({var})'
+        return self._build_list_expression(var, *args)
+
+    def _build_list_expression(self, var: Variable, item_type: Type) -> str:
+        item_var = var.next_identifier()
+        handler = self.root.build(item_var, item_type)
+        return f'[{handler} for {item_var} in {var}]'
 
 
 class UserNode(Node):
